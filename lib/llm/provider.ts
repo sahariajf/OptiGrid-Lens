@@ -42,9 +42,18 @@ export interface LlmConfig {
   timeoutMs: number
 }
 
+/**
+ * Small, fast models by default. Note interpretation is a short structured
+ * extraction over at most three sentences - the frontier tier buys little here
+ * and costs latency against the 5s p95 band.
+ *
+ * Verified present on the account with `npm run models`. Override per
+ * deployment with LLM_MODEL; step up to gpt-5.4 or gemini-3.8-pro if a
+ * paraphrase class turns out to need it.
+ */
 const DEFAULT_MODELS: Record<ProviderId, string> = {
-  openai: "gpt-5",
-  gemini: "gemini-3-pro",
+  openai: "gpt-5.4-mini",
+  gemini: "gemini-3.8-flash",
 }
 
 const DEFAULT_TIMEOUT_MS = 12_000

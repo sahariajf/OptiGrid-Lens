@@ -10,7 +10,8 @@
     "test:watch": "vitest",
     "lint": "biome check .",
     "format": "biome check --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "models": "node --env-file=.env.local scripts/list-models.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.23.0",
