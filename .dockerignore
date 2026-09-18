@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.github
+.cases-out
+.env
+.env.*
+!.env.example
+*.md
+!README.md
+tests
+testcases
+scripts
+vitest.config.mts
+biome.json

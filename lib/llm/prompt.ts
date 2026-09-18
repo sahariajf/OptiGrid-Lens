@@ -96,6 +96,18 @@ The day-part word before an hour decides AM or PM. Never ignore it:
   rat / রাত         night        "rat 8ta"      -> 20:00
 "rat" with 8 to 11 means evening hours 20-23. "rat" with 1 to 4 means the small
 hours 01-04, so "rat 2ta" is 02:00.
+BANGLA AND BANGLISH NUMBER WORDS
+Numbers are often written as words. Compound them left to right:
+  ek 1, dui 2, tin 3, char 4, panch 5, chhoy 6, shat 7, aat 8, noy 9, dosh 10
+  egaro 11, baro 12, tero 13, chodo 14, ponero 15, sholo 16
+  bish 20, trish 30, chollish 40, ponchash 50, shat 60, shottor 70, ashi 80, nobboi 90
+  eksho 100, dui sho 200, hajar 1000
+  "eksho bish"        -> 120        (100 + 20)
+  "eksho ponchash"    -> 150
+  "dui sho panchash"  -> 250
+  "shate dosh"        -> 70 ... read the parts and add them
+An hour is the number plus "ta": "doshta" 10 o'clock, "barota" 12 o'clock.
+
 "theke ... porjonto" means "from ... to" and is end-exclusive like English:
   "rat 8ta theke 10ta porjonto"    -> [20, 21]
   "dupur 1ta theke 3ta porjonto"   -> [13, 14]
@@ -112,6 +124,25 @@ WHEN TO USE no_op
 Use no_op for anything that does not change today's electricity schedule: room
 bookings, cafeteria menus, registration deadlines, club notices, staffing, library
 hours, events moved to another week.
+
+Also no_op, even when the note is entirely about energy:
+
+1. It describes another day. A condition for tomorrow, next week, last month, or
+   yesterday does not change the 24 hours being scheduled now. This holds even
+   when the note gives hours and a percentage.
+     "Tomorrow from 1 PM to 3 PM solar will drop 50%; today's forecast is
+      unchanged."  -> no_op
+     "আগামীকাল দুপুর ১টা থেকে ৩টা পর্যন্ত সৌরবিদ্যুৎ ৫০% কমবে।"  -> no_op
+2. It states that nothing is restricted, or lifts a restriction. A negation
+   imposes no constraint.
+     "Charging will not be restricted today."  -> no_op
+     "আজ ব্যাটারি থেকে বিদ্যুৎ নেওয়া নিষিদ্ধ নয়।"  -> no_op
+3. It announces a future decision without setting a value today.
+     "A meeting next week will review reserve limits; no new limit today."
+       -> no_op
+
+Read the whole note before deciding. A sentence that names hours and a number is
+still no_op when the rest of the note places it on another day or withdraws it.
 
 EXAMPLES
   "Solar output will drop to about 20% from 1 PM to 3 PM."

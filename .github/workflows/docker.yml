@@ -1,0 +1,53 @@
+# Builds and publishes the fallback image to GHCR on every push to main.
+# Nobody needs Docker installed locally - GitHub's runners do the work, and the
+# digest in the run summary is what the submission form asks for.
+name: docker
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test the published image
+        run: |
+          docker run -d --name gw -p 3000:3000 -e OPENAI_API_KEY=placeholder \
+            ghcr.io/${{ github.repository }}:latest
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/health | grep -q '"ok"'; then
+              echo "health OK after ${i}s"; docker rm -f gw; exit 0
+            fi
+            sleep 1
+          done
+          echo "health never became ready"; docker logs gw; docker rm -f gw; exit 1
