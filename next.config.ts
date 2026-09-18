@@ -1,7 +1,9 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  // Emits a self-contained server bundle in .next/standalone so the Docker
+  // fallback image stays small and needs no node_modules at runtime.
+  output: "standalone",
+}
 
-export default nextConfig;
+export default nextConfig
