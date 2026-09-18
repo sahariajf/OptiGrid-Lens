@@ -241,7 +241,7 @@ const RESET = "[0m"
 const allCases = loadCases(source)
 const cases = filter ? allCases.filter((c) => c.id.includes(filter)) : allCases
 
-console.log(`\nShakti case runner`)
+console.log(`\nOptiGrid Lens case runner`)
 console.log(`  source : ${source} (${cases.length}/${allCases.length} cases)`)
 console.log(`  target : ${baseUrl ?? "in-process pipeline"}`)
 console.log(`  output : ${outDir}/\n`)

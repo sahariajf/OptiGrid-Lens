@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json(body, { status })
   } catch (error) {
     // Logged in full server-side, reported generically to the caller.
-    console.error("shakti", JSON.stringify({ fatal: String(error).slice(0, 200) }))
+    console.error("optigrid", JSON.stringify({ fatal: String(error).slice(0, 200) }))
     return NextResponse.json({ error: "internal error" }, { status: 500 })
   }
 }

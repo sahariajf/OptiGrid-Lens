@@ -1,8 +1,8 @@
 # Fallback execution path for the judges. Multi-stage so the runtime image
 # carries only the standalone server bundle, not the build toolchain.
 #
-#   docker build -t shakti .
-#   docker run --rm -p 3000:3000 -e OPENAI_API_KEY=... shakti
+#   docker build -t optigrid-lens .
+#   docker run --rm -p 3000:3000 -e OPENAI_API_KEY=... optigrid-lens
 #
 # No secret is baked in: the key arrives at runtime through -e or --env-file.
 

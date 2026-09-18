@@ -1,5 +1,5 @@
 /**
- * Domain types for the Shakti service.
+ * Domain types for the OptiGrid Lens service.
  *
  * Wire types (snake_case) mirror the Problem Statement exactly and must not be
  * renamed. Internal types (camelCase) are ours and never leave the process.

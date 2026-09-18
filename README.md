@@ -1,9 +1,9 @@
-# Shakti
+# OptiGrid Lens
 
 **LLM-assisted operator directive interpretation and 24-hour campus energy
 optimization.** BUP CSE Fest 2026 preliminary round.
 
-Shakti takes a 24-hour energy scenario plus 1–3 natural-language operator notes,
+OptiGrid Lens takes a 24-hour energy scenario plus 1–3 natural-language operator notes,
 interprets each note into a structured directive using a language model,
 validates that interpretation with deterministic guardrails, and returns a
 cost-optimal 24-hour schedule that obeys every valid directive.
@@ -183,7 +183,7 @@ plan and cannot disagree with it.
 Requires Node.js 20 or newer (developed on 24) and an OpenAI API key.
 
 ```bash
-git clone <this-repo> && cd shakti-energy-optimizer
+git clone <this-repo> && cd optigrid-lens
 npm install
 cp .env.example .env.local        # then put your key in .env.local
 npm run build
@@ -328,8 +328,8 @@ credentials** — keys are supplied at runtime with `-e` or `--env-file`.
 To build locally instead:
 
 ```bash
-docker build -t shakti .
-docker run --rm -p 3000:3000 -e OPENAI_API_KEY=<your-key> shakti
+docker build -t optigrid-lens .
+docker run --rm -p 3000:3000 -e OPENAI_API_KEY=<your-key> optigrid-lens
 ```
 
 ---
