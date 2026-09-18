@@ -17,6 +17,139 @@ Operator notes may be written in **English, Bangla, or Banglish**.
 
 ---
 
+## API
+
+### `GET /health`
+
+Readiness probe. Does no work — it touches neither the model provider nor the
+solver, so it stays fast and cannot report unready because of an upstream
+hiccup. Also the warm-up ping before a judging window.
+
+```
+200 OK
+{ "status": "ok" }
+```
+
+### `POST /optimize-energy`
+
+Accepts one scenario, returns the interpretation and the 24-hour schedule.
+
+| Status | When |
+|---|---|
+| `200` | Scenario scheduled successfully |
+| `400` | Body is not valid JSON, or fails the request schema |
+| `500` | Unexpected internal error — generic message, never a stack trace |
+
+#### Request
+
+| Field | Type | Notes |
+|---|---|---|
+| `scenario_id` | string | Non-empty. Echoed back in the response |
+| `operator_notes` | string[] | 1–3 non-empty notes. English, Bangla or Banglish |
+| `hours` | object[24] | Hours 0–23, each exactly once. Any order is accepted |
+| `hours[].hour` | integer | 0–23 |
+| `hours[].demand_kwh` | number | ≥ 0. Must be met every hour |
+| `hours[].solar_kwh` | number | ≥ 0. Before any `solar_reduction` |
+| `hours[].tariff_bdt_per_kwh` | number | Grid price for this hour |
+| `battery.capacity_kwh` | number | Maximum stored energy |
+| `battery.initial_energy_kwh` | number | Level at the start of hour 0 |
+| `battery.minimum_energy_kwh` | number | Base floor, never breached |
+| `battery.max_charge_kwh_per_hour` | number | Hourly charge limit |
+| `battery.max_discharge_kwh_per_hour` | number | Hourly discharge limit |
+
+#### Response
+
+| Field | Type | Notes |
+|---|---|---|
+| `scenario_id` | string | Matches the request |
+| `directive_interpretation` | object[] | Exactly one entry per note, in `note_index` order |
+| `hourly_plan` | object[24] | One entry per hour, 0–23 ascending |
+| `total_grid_kwh` | number | Sum of `grid_kwh`, recomputed from the plan |
+| `total_cost_bdt` | number | Σ `grid_kwh × tariff`, recomputed from the plan |
+| `peak_grid_kwh` | number | Maximum hourly `grid_kwh` |
+| `plan_summary` | string | Short human-readable strategy description |
+
+**`directive_interpretation[]`** — `note_index` (zero-based), `applies`,
+`directive_type`, `structured_adjustment`, `explanation`. `no_op` is the only
+type with `applies: false`, and it always carries a `null` adjustment.
+
+| `directive_type` | `structured_adjustment` |
+|---|---|
+| `solar_reduction` | `{ hours: number[], factor: number }` — `factor` is the fraction **remaining** |
+| `minimum_battery_reserve` | `{ hours: number[], minimum_energy_kwh: number }` |
+| `no_charge_window` | `{ hours: number[] }` |
+| `no_discharge_window` | `{ hours: number[] }` |
+| `max_grid_window` | `{ hours: number[], max_grid_kwh: number }` |
+| `no_op` | `null` |
+
+`hours` is always unique integers 0–23 in ascending order. Windows are
+start-inclusive and end-exclusive, so `1 PM to 3 PM` is `[13, 14]` and
+`13:00 to 14:00` is `[13]`.
+
+**`hourly_plan[]`** — `hour`, `grid_kwh`, `solar_used_kwh`, `battery_action`
+(`charge` \| `discharge` \| `idle`), `battery_kwh` (non-negative magnitude, `0`
+when idle), `battery_energy_after_kwh`.
+
+#### Sample response
+
+Real output for public case `SAMPLE-01`, with `hourly_plan` abridged to five of
+its 24 entries:
+
+```jsonc
+{
+  "scenario_id": "SAMPLE-01",
+  "directive_interpretation": [
+    {
+      "note_index": 0,
+      "applies": true,
+      "directive_type": "solar_reduction",
+      "structured_adjustment": { "hours": [12, 13], "factor": 0.25 },
+      "explanation": "Solar panels will be cleaned from noon to 2 PM, reducing usable solar to about a quarter of forecast."
+    },
+    {
+      "note_index": 1,
+      "applies": false,
+      "directive_type": "no_op",
+      "structured_adjustment": null,
+      "explanation": "The note only says a registration deadline was moved, which does not change today's electricity schedule."
+    }
+  ],
+  "hourly_plan": [
+    { "hour": 0,  "grid_kwh": 50,    "solar_used_kwh": 0,    "battery_action": "discharge", "battery_kwh": 40, "battery_energy_after_kwh": 70 },
+    { "hour": 1,  "grid_kwh": 85,    "solar_used_kwh": 0,    "battery_action": "idle",      "battery_kwh": 0,  "battery_energy_after_kwh": 70 },
+    // ... hours 2-12 ...
+    { "hour": 13, "grid_kwh": 187.5, "solar_used_kwh": 42.5, "battery_action": "charge",    "battery_kwh": 50, "battery_energy_after_kwh": 155 },
+    // ... hours 14-18 ...
+    { "hour": 19, "grid_kwh": 165,   "solar_used_kwh": 0,    "battery_action": "discharge", "battery_kwh": 50, "battery_energy_after_kwh": 90 },
+    // ... hours 20-22 ...
+    { "hour": 23, "grid_kwh": 155,   "solar_used_kwh": 0,    "battery_action": "charge",    "battery_kwh": 50, "battery_energy_after_kwh": 110 }
+  ],
+  "total_grid_kwh": 2692.5,
+  "total_cost_bdt": 38365,
+  "peak_grid_kwh": 187.5,
+  "plan_summary": "Applied 1 operator directive (reduced solar to 25% for 2h). Ignored 1 unrelated note. Shifted battery energy into high-tariff hours for a total grid cost of 38365.00 BDT, returning the battery to its starting level."
+}
+```
+
+Note hour 13: usable solar is capped at 42.5 kWh — 25% of the 170 kWh forecast —
+because the first note was applied. The battery ends hour 23 back at its starting
+110 kWh, satisfying end-of-day neutrality.
+
+#### Error responses
+
+```jsonc
+// 400 - malformed body
+{ "error": "invalid request: body is not valid JSON" }
+
+// 400 - fails the schema, naming the field without echoing request content
+{ "error": "invalid request: operator_notes Too big: expected array to have <=3 items" }
+
+// 500 - controlled, never a stack trace or provider message
+{ "error": "internal error" }
+```
+
+---
+
 ## Architecture
 
 The core idea is that **human notes are never trusted as mathematics**. A note
