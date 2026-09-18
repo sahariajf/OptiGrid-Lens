@@ -118,7 +118,10 @@ export async function interpretNotes(
   // which is how a 12s setting produced a 24s request - close enough to the
   // harness's 30s limit to turn a slow case into an outright failure.
   const deadline = started + config.timeoutMs
-  const attemptCap = config.timeoutMs * ATTEMPT_SHARE
+  // Reserve room for a fallback only when there is one. With a single provider
+  // configured, holding back a third of the budget just converts slow-but-usable
+  // answers into no_op entries for nothing.
+  const attemptCap = order.length > 1 ? config.timeoutMs * ATTEMPT_SHARE : config.timeoutMs
   const minAttempt = config.timeoutMs * MIN_ATTEMPT_SHARE
 
   const failures: string[] = []

@@ -35,6 +35,11 @@ Hours are whole numbers 0-23. Every window is START-INCLUSIVE and END-EXCLUSIVE.
   "during the 3 PM hour"   -> [15]
 Hours must be unique and ascending. Use [] only for no_op.
 
+"through" and "inclusive" INCLUDE the named end hour, unlike "to" and "until":
+  "from 17:00 through 20:00"  -> [17, 18, 19, 20]
+  "from 17:00 until 20:00"    -> [17, 18, 19]
+  "5 PM through 8 PM inclusive" -> [17, 18, 19, 20]
+
 TIMES WITHOUT AM OR PM
 When a note gives a bare clock time, pick the reading that makes physical sense
 for the activity described. Solar generation, panel washing, panel inspection and

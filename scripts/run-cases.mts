@@ -105,6 +105,33 @@ interface Failure {
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 
+/**
+ * Compares adjustments the way the judge does: hours exactly, numbers within the
+ * 0.01 tolerance from the Problem Statement.
+ *
+ * Exact equality would fail a correct answer over float representation alone -
+ * two-thirds arrives as 0.6666666666666666 from one source and 0.6666666667
+ * from another, and both are right.
+ */
+function adjustmentMatches(actual: unknown, expected: unknown): boolean {
+  if (actual === null || expected === null) return actual === expected
+  const a = actual as Record<string, unknown>
+  const b = expected as Record<string, unknown>
+  if (!same(a.hours, b.hours)) return false
+
+  for (const field of ["factor", "minimum_energy_kwh", "max_grid_kwh"] as const) {
+    const left = a[field]
+    const right = b[field]
+    if (left === undefined && right === undefined) continue
+    if (typeof left !== "number" || typeof right !== "number") {
+      if (left !== right) return false
+      continue
+    }
+    if (Math.abs(left - right) > 0.01) return false
+  }
+  return true
+}
+
 function gradeInterpretation(
   got: DirectiveInterpretation[],
   want: DirectiveInterpretation[],
@@ -127,7 +154,7 @@ function gradeInterpretation(
     if (actual.applies !== expected.applies) {
       problems.push(`applies: expected ${expected.applies}, got ${actual.applies}`)
     }
-    if (!same(actual.structured_adjustment, expected.structured_adjustment)) {
+    if (!adjustmentMatches(actual.structured_adjustment, expected.structured_adjustment)) {
       problems.push(
         `adjustment: expected ${JSON.stringify(expected.structured_adjustment)}, got ${JSON.stringify(actual.structured_adjustment)}`,
       )

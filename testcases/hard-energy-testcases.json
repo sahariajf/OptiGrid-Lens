@@ -372,7 +372,7 @@
       "input": {
         "scenario_id": "HARD-03-grid-cap-words",
         "operator_notes": [
-          "From nineteen until twenty-one, grid import must not exceed one hundred twenty kWh per hour.",
+          "From nineteen until twenty-one, grid import must not exceed one hundred sixty kWh per hour.",
           "Charging will not be restricted today."
         ],
         "hours": [
@@ -537,7 +537,7 @@
             "directive_type": "max_grid_window",
             "structured_adjustment": {
               "hours": [19, 20],
-              "max_grid_kwh": 120
+              "max_grid_kwh": 160
             },
             "explanation": ""
           },
@@ -913,7 +913,7 @@
             "applies": true,
             "directive_type": "solar_reduction",
             "structured_adjustment": {
-              "hours": [13, 14],
+              "hours": [13],
               "factor": 0.6666666667
             },
             "explanation": ""
@@ -2027,7 +2027,7 @@
             "applies": true,
             "directive_type": "max_grid_window",
             "structured_adjustment": {
-              "hours": [21, 22],
+              "hours": [21],
               "max_grid_kwh": 175
             },
             "explanation": ""
@@ -2041,7 +2041,7 @@
         "scenario_id": "HARD-12-reserve-cap-mixed",
         "operator_notes": [
           "From 18:00 to 21:00, battery energy must remain at least 50 kWh.",
-          "At 19:00 through 20:00, grid import is capped at 155 kWh per hour.",
+          "At 19:00 through 20:00, grid import is capped at 165 kWh per hour.",
           "Yesterday's charger maintenance finished ahead of schedule."
         ],
         "hours": [
@@ -2216,7 +2216,7 @@
             "directive_type": "max_grid_window",
             "structured_adjustment": {
               "hours": [19, 20],
-              "max_grid_kwh": 155
+              "max_grid_kwh": 165
             },
             "explanation": ""
           },
