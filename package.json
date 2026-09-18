@@ -13,8 +13,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.126.0",
+    "@google/genai": "^2.23.0",
     "next": "16.3.5",
+    "openai": "^7.18.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "yalps": "^0.6.4",
