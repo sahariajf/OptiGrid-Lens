@@ -54,7 +54,7 @@ export function createOpenAiProvider(model: string): InterpretationProvider {
           text: {
             format: {
               type: "json_schema",
-              name: "gridwise_interpretation",
+              name: "shakti_interpretation",
               schema: INTERPRETATION_JSON_SCHEMA as unknown as Record<string, unknown>,
               strict: true,
             },

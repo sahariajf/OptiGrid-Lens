@@ -38,7 +38,7 @@ interface Diagnostics {
 
 function log(diagnostics: Diagnostics): void {
   const level = diagnostics.replay_valid ? "info" : "error"
-  console[level]("gridwise", JSON.stringify(diagnostics))
+  console[level]("shakti", JSON.stringify(diagnostics))
 }
 
 /**
