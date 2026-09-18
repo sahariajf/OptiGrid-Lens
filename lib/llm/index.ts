@@ -35,6 +35,15 @@ export interface InterpretationOutcome {
 const CACHE_LIMIT = 500
 const cache = new Map<string, unknown>()
 
+/**
+ * Share of the total budget any one attempt may consume. Keeping this a
+ * fraction rather than a fixed millisecond value means the reserve for a
+ * fallback survives someone tightening LLM_TIMEOUT_MS.
+ */
+const ATTEMPT_SHARE = 0.67
+/** A fallback with less than this share left cannot realistically finish. */
+const MIN_ATTEMPT_SHARE = 0.12
+
 function cacheKey(provider: string, model: string, input: InterpretationInput): string {
   // Capacity and base minimum participate because percentage phrasings resolve
   // against them - the same sentence can mean a different kWh figure.
@@ -56,9 +65,14 @@ function remember(key: string, value: unknown): void {
   cache.set(key, value)
 }
 
-function hasKey(provider: ProviderId): boolean {
+/**
+ * Reads from the injected env rather than `process.env` so provider selection
+ * is decided by the same environment as the rest of the config. Mixing the two
+ * sources makes the chain behave differently from what `resolveLlmConfig` saw.
+ */
+function hasKey(provider: ProviderId, env: NodeJS.ProcessEnv): boolean {
   const name = provider === "openai" ? "OPENAI_API_KEY" : "GEMINI_API_KEY"
-  return Boolean(process.env[name])
+  return Boolean(env[name])
 }
 
 function build(provider: ProviderId, model: string): InterpretationProvider {
@@ -95,12 +109,27 @@ export async function interpretNotes(
   // going down mid-judging is a documented risk; a second provider is the
   // cheapest insurance available, and it keeps an LLM in the path.
   const secondary: ProviderId = config.provider === "openai" ? "gemini" : "openai"
-  const order: ProviderId[] = hasKey(secondary) ? [config.provider, secondary] : [config.provider]
+  const order: ProviderId[] = hasKey(secondary, env)
+    ? [config.provider, secondary]
+    : [config.provider]
+
+  // One deadline for the whole chain, not one per provider. A per-provider
+  // timeout lets a slow primary plus a failover stack into double the budget,
+  // which is how a 12s setting produced a 24s request - close enough to the
+  // harness's 30s limit to turn a slow case into an outright failure.
+  const deadline = started + config.timeoutMs
+  const attemptCap = config.timeoutMs * ATTEMPT_SHARE
+  const minAttempt = config.timeoutMs * MIN_ATTEMPT_SHARE
 
   const failures: string[] = []
   for (const providerId of order) {
-    if (!hasKey(providerId)) {
+    if (!hasKey(providerId, env)) {
       failures.push(`${providerId}: no api key`)
+      continue
+    }
+    const remaining = deadline - performance.now()
+    if (remaining < minAttempt) {
+      failures.push(`${providerId}: no time left in budget`)
       continue
     }
     const model = providerId === config.provider ? config.model : undefined
@@ -109,7 +138,12 @@ export async function interpretNotes(
       model ?? resolveLlmConfig({ ...env, LLM_PROVIDER: providerId, LLM_MODEL: "" }).model,
     )
     try {
-      const raw = await provider.interpret(input, AbortSignal.timeout(config.timeoutMs))
+      // Cap any single attempt so a hung primary always leaves the fallback
+      // something to work with. Floored because `performance.now()` returns a
+      // float and AbortSignal.timeout rejects a non-integer delay outright -
+      // which silently killed the fallback rather than shortening it.
+      const attemptMs = Math.max(1, Math.floor(Math.min(remaining, attemptCap)))
+      const raw = await provider.interpret(input, AbortSignal.timeout(attemptMs))
       if (providerId === config.provider) remember(key, raw)
       return {
         raw,

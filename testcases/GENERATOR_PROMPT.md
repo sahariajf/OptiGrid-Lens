@@ -77,6 +77,21 @@ not block discharge during hours whose demand needs the battery.
 **Combined directives.** When a case has two directives, check them together — a
 reserve plus a grid cap in the same evening is where infeasibility hides.
 
+## Every number in the expected answer must be present in the note
+
+Do not expect a value the note never states. This is a real mistake that has
+produced unusable cases:
+
+> note: "Panel washing from one until three."
+> expected: `solar_reduction, hours [13,14], factor 0.5`
+
+The note gives hours but says nothing about how much solar is lost. `0.5` was
+invented, and no reader could derive it. Either state the level in the note
+("...will leave half the forecast output") or make the case a `no_op`.
+
+The same applies to reserves and grid caps: if the note does not give a number
+or a percentage, there is no correct numeric answer.
+
 ## What makes a case hard
 
 Cover these. Aim for variety across a batch rather than piling everything into

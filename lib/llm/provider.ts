@@ -66,10 +66,14 @@ function asProviderId(value: string | undefined): ProviderId {
 }
 
 /**
- * Resolves provider settings from the environment. The timeout is deliberately
- * well under the harness's 30s per-request limit: a slow call should degrade to
- * the fallback path, never time the request out, because a timeout counts as a
- * failure rather than merely slow.
+ * Resolves provider settings from the environment.
+ *
+ * `timeoutMs` is the TOTAL budget for interpretation, shared across the primary
+ * provider and any fallback - it is not a per-provider timeout. Treating it as
+ * per-provider is how a 12s setting produced a 24s request: the primary hung for
+ * its full allowance and the fallback then started a fresh one. 12s total keeps
+ * even a complete failover chain inside the 5-15s latency band, and far from the
+ * 30s mark where a slow response stops counting as slow and counts as a failure.
  */
 export function resolveLlmConfig(env: NodeJS.ProcessEnv = process.env): LlmConfig {
   const provider = asProviderId(env.LLM_PROVIDER)
