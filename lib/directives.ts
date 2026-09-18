@@ -1,4 +1,10 @@
-import { type BatteryInput, type Directive, HOURS_IN_DAY, type HourInput } from "./types"
+import {
+  type BatteryInput,
+  type Directive,
+  type DirectiveInterpretation,
+  HOURS_IN_DAY,
+  type HourInput,
+} from "./types"
 
 /**
  * Per-hour constraint arrays compiled from the base scenario plus every active
@@ -60,4 +66,35 @@ export function compileConstraints(
   }
 
   return { effectiveSolar, minLevel, maxGrid, canCharge, canDischarge }
+}
+
+/**
+ * Converts a wire interpretation entry into the internal directive form.
+ *
+ * Used by the case runner and the test fixtures to turn an EXPECTED
+ * interpretation into constraints, so a schedule can be replayed against
+ * ground truth the way the judge does rather than against our own answer.
+ */
+export function directiveFromInterpretation(entry: DirectiveInterpretation): Directive {
+  const adjustment = (entry.structured_adjustment ?? {}) as Record<string, unknown>
+  const hours = Array.isArray(adjustment.hours) ? (adjustment.hours as number[]) : []
+
+  switch (entry.directive_type) {
+    case "solar_reduction":
+      return { kind: "solar_reduction", hours, factor: Number(adjustment.factor) }
+    case "minimum_battery_reserve":
+      return {
+        kind: "minimum_battery_reserve",
+        hours,
+        minimumEnergyKwh: Number(adjustment.minimum_energy_kwh),
+      }
+    case "max_grid_window":
+      return { kind: "max_grid_window", hours, maxGridKwh: Number(adjustment.max_grid_kwh) }
+    case "no_charge_window":
+      return { kind: "no_charge_window", hours }
+    case "no_discharge_window":
+      return { kind: "no_discharge_window", hours }
+    case "no_op":
+      return { kind: "no_op" }
+  }
 }

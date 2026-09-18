@@ -35,6 +35,15 @@ Hours are whole numbers 0-23. Every window is START-INCLUSIVE and END-EXCLUSIVE.
   "during the 3 PM hour"   -> [15]
 Hours must be unique and ascending. Use [] only for no_op.
 
+TIMES WITHOUT AM OR PM
+When a note gives a bare clock time, pick the reading that makes physical sense
+for the activity described. Solar generation, panel washing, panel inspection and
+roof work all happen in daylight, so those notes mean afternoon hours:
+  "panel washing from one until three"   -> [13, 14]   not [1, 2]
+  "cleaning between ten and twelve"      -> [10, 11]
+Campus operations notes otherwise refer to working hours unless the note says
+night, dawn, midnight, or gives an explicit AM time.
+
 NUMBERS
 "factor" is the fraction of forecast solar that REMAINS, from 0 to 1:
   "drops to about 20%"        -> 0.2
@@ -75,6 +84,8 @@ EXAMPLES
     -> max_grid_window, hours [18, 19, 20], max_grid_kwh 155
   "For protection testing, the battery must not discharge from 6 PM until 8 PM."
     -> no_discharge_window, hours [18, 19]
+  "Panel washing from one until three will leave roughly one-fifth of normal solar."
+    -> solar_reduction, hours [13, 14], factor 0.2   (daylight, so 1 PM not 1 AM)
   "দুপুর ১টা থেকে ৩টা পর্যন্ত সোলার উৎপাদন ৮০% কমে যাবে।"
     -> solar_reduction, hours [13, 14], factor 0.2
   "Battery charge kora jabe na 2 AM theke 5 AM porjonto."

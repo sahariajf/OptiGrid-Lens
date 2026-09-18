@@ -12,7 +12,8 @@
     "format": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "models": "node --env-file=.env.local scripts/list-models.mjs",
-    "eval": "vite-node scripts/eval.mts"
+    "eval": "vite-node scripts/eval.mts",
+    "cases": "vite-node scripts/run-cases.mts"
   },
   "dependencies": {
     "@google/genai": "^2.23.0",
