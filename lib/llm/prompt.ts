@@ -70,12 +70,27 @@ Campus operations notes otherwise refer to working hours unless the note says
 night, dawn, midnight, or gives an explicit AM time.
 
 NUMBERS
-"factor" is the fraction of forecast solar that REMAINS, from 0 to 1:
+"factor" is the fraction of forecast solar that REMAINS, from 0 to 1.
+Decide first whether the number in the note is what REMAINS or what is LOST,
+then convert. A number that is LOST becomes 1 minus that number.
+
+  what remains, use directly:
   "drops to about 20%"        -> 0.2
-  "an 80% reduction"          -> 0.2
   "roughly half the forecast" -> 0.5
   "about one-fifth of normal" -> 0.2
   "a quarter of the forecast" -> 0.25
+
+  what is lost, subtract from 1:
+  "an 80% reduction"          -> 0.2      1 - 0.80
+  "will decrease by 12.5%"    -> 0.875    1 - 0.125,  NOT 0.125
+  "a 10% reduction"           -> 0.9      1 - 0.10
+  "drops by a quarter"        -> 0.75     1 - 0.25
+  "loses 30% of forecast"     -> 0.7      1 - 0.30
+
+A SMALL reduction therefore gives a LARGE factor. Do not copy the number from
+the note into "factor" without checking which of the two it is. If the note says
+the output falls, decreases, drops by, is reduced by, or loses an amount, that
+amount is lost, not remaining.
 A reserve given as a percentage is multiplied by the battery capacity stated in the
 request. With capacity 200 kWh, "at least 50% of capacity" -> 100.
 Set a numeric field to null when the chosen directive type does not use it.
@@ -105,8 +120,20 @@ Numbers are often written as words. Compound them left to right:
   "eksho bish"        -> 120        (100 + 20)
   "eksho ponchash"    -> 150
   "dui sho panchash"  -> 250
-  "shate dosh"        -> 70 ... read the parts and add them
 An hour is the number plus "ta": "doshta" 10 o'clock, "barota" 12 o'clock.
+
+Bangla has a single irregular word for every value from 1 to 99, not just the
+round tens: shaitrish 37, poytrish 35, unotrish 29, ekchollish 41, pochattor 75,
+ekashi 81. Read the word, do not guess from a similar-sounding one.
+
+"doshomik" (দশমিক) is the decimal point, and the digits after it are read singly:
+  "eksho shaitrish doshomik pach"   -> 137.5     (100 + 37, then .5)
+  "ponchash doshomik pach"          -> 50.5
+
+"X bhager Y bhag" (X ভাগের Y ভাগ) is the fraction Y over X:
+  "aat bhager pach bhag"      -> 5/8 = 0.625
+  "char bhager tin bhag"      -> 3/4 = 0.75
+  "capacity-r aat bhager pach bhag" with capacity 190 -> 0.625 x 190 = 118.75
 
 "theke ... porjonto" means "from ... to" and is end-exclusive like English:
   "rat 8ta theke 10ta porjonto"    -> [20, 21]
