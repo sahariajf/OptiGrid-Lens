@@ -320,7 +320,8 @@ git clone <this-repo> && cd optigrid-lens
 npm install
 cp .env.example .env.local        # then put your key in .env.local
 npm run build
-npm start                          # http://localhost:3000
+npm start  
+                        # http://localhost:3000
 ```
 
 ```bash
