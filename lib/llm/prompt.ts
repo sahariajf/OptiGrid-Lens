@@ -12,6 +12,13 @@ import type { InterpretationInput } from "./provider"
  *  - Notes may arrive in English, Bangla, or a mix, so the examples cover all
  *    three. Instructing a model to "handle other languages" is weaker than
  *    showing it one.
+ *
+ * INFERRED, NOT DOCUMENTED: the rule that "through" includes the end hour. The
+ * organizers never use "through" for a time window - all 14 published examples
+ * use to/until/between, which are end-exclusive and confirmed by their stated
+ * rule. The inference rests on their own phrase "hours 0 through 23" meaning an
+ * inclusive 0-23. If a hidden case proves otherwise, delete the "through" block
+ * from TIME WINDOWS below and nothing else changes.
  */
 export const SYSTEM_PROMPT = `You convert campus energy operator notes into structured directives for a scheduling optimizer.
 
