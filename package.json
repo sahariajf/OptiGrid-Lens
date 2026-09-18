@@ -11,7 +11,8 @@
     "lint": "biome check .",
     "format": "biome check --write .",
     "typecheck": "tsc --noEmit",
-    "models": "node --env-file=.env.local scripts/list-models.mjs"
+    "models": "node --env-file=.env.local scripts/list-models.mjs",
+    "eval": "vite-node scripts/eval.mts"
   },
   "dependencies": {
     "@google/genai": "^2.23.0",
@@ -30,6 +31,7 @@
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vite-node": "^6.0.0",
     "vitest": "^5.0.1"
   },
   "engines": {
