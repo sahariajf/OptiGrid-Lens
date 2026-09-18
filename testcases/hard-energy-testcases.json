@@ -1271,7 +1271,7 @@
             "applies": true,
             "directive_type": "minimum_battery_reserve",
             "structured_adjustment": {
-              "hours": [17, 18, 19, 20],
+              "hours": [17, 18, 19],
               "minimum_energy_kwh": 70
             },
             "explanation": ""
@@ -2215,7 +2215,7 @@
             "applies": true,
             "directive_type": "max_grid_window",
             "structured_adjustment": {
-              "hours": [19, 20],
+              "hours": [19],
               "max_grid_kwh": 165
             },
             "explanation": ""
